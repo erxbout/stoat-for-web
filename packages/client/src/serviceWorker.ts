@@ -1,10 +1,75 @@
 /// <reference lib="webworker" />
+import { CONFIGURATION } from "@revolt/common";
+import { Client } from "stoat.js";
 import { cleanupOutdatedCaches, precacheAndRoute } from "workbox-precaching";
+import { ThinState } from "./serviceWorkerState";
 
 declare let self: ServiceWorkerGlobalScope;
 
+interface ChannelPartial {
+  channel_type: string;
+  name?: string;
+}
+
+interface StoatPushNotification {
+  title?: string;
+  author?: string;
+  body: string;
+  icon?: string;
+  channel?: ChannelPartial;
+}
+
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
+
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+  const payload = event.data.text();
+
+  console.log(payload);
+
+  const notification: StoatPushNotification = JSON.parse(payload);
+
+  if (!notification.title) {
+    if (notification.channel) {
+      if (notification.channel.channel_type === "DirectMessage") {
+        notification.title = notification.author || "Stoat";
+      } else {
+        notification.title = `${notification.author} in ${notification.channel.name}`;
+      }
+    } else {
+      notification.title = "Stoat";
+    }
+  }
+
+  event.waitUntil(
+    (async () => {
+      const thinState = new ThinState();
+      await thinState.load();
+      // Don't notify if the session is missing or invalid.
+      if (!thinState.auth.auth.session?.valid) {
+        return;
+      }
+      const client = new Client({
+        baseURL: CONFIGURATION.DEFAULT_API_URL,
+        autoReconnect: false,
+        syncUnreads: true,
+        debug: import.meta.env.DEV,
+      });
+      client.useExistingSession({
+        ...thinState.auth.auth.session,
+        user_id: thinState.auth.auth.session.userId,
+      });
+
+      notification.body = await client.markdownToTextFetch(notification.body);
+
+      await self.registration.showNotification(notification.title || "Stoat", {
+        icon: notification.icon,
+        body: notification.body,
+      });
+    })(),
+  );
 });
 
 cleanupOutdatedCaches();
