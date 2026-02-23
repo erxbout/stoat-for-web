@@ -5,6 +5,7 @@ import {
   ChannelEditSystemMessage,
   ChannelOwnershipChangeSystemMessage,
   ChannelRenamedSystemMessage,
+  Client,
   Message,
   MessagePinnedSystemMessage,
   TextSystemMessage,
@@ -228,7 +229,7 @@ export function NotificationsWorker() {
       Notification.requestPermission().then((permission) => {
         if (permission === "denied") {
           localStorage.setItem("denied-notifications", "1");
-          killServiceWorkerSubscription();
+          killServiceWorkerSubscription(client());
         } else {
           setUpServiceWorkerSubscription();
         }
@@ -278,15 +279,6 @@ export function NotificationsWorker() {
       .replace(/=+$/, "");
   }
 
-  function killServiceWorkerSubscription() {
-    navigator.serviceWorker.getRegistration().then((registration) => {
-      if (!registration) return;
-      registration.pushManager
-        .getSubscription()
-        .then((subscription) => subscription?.unsubscribe());
-    });
-  }
-
   onMount(() => {
     // don't bother mounting if denied before
     if (!localStorage.getItem("denied-notifications")) {
@@ -297,4 +289,17 @@ export function NotificationsWorker() {
   onCleanup(() => document.removeEventListener("click", tryRequest));
 
   return null;
+}
+
+export function killServiceWorkerSubscription(client: Client) {
+  navigator.serviceWorker.getRegistration().then((registration) => {
+    if (!registration) return;
+    registration.pushManager.getSubscription().then((subscription) =>
+      subscription?.unsubscribe().then((successful) => {
+        if (successful) {
+          client.api.post("/push/unsubscribe");
+        }
+      }),
+    );
+  });
 }
