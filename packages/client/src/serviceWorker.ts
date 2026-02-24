@@ -17,10 +17,22 @@ interface StoatPushNotification {
   body: string;
   icon?: string;
   channel?: ChannelPartial;
+  url?: string;
 }
 
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  if (typeof event.notification.data === "string") {
+    event.waitUntil(
+      self.clients
+        .openWindow(event.notification.data)
+        .then((windowClient) => (windowClient ? windowClient.focus() : null)),
+    );
+  }
 });
 
 self.addEventListener("push", (event) => {
@@ -40,6 +52,8 @@ self.addEventListener("push", (event) => {
       notification.title = "Stoat";
     }
   }
+
+  notification.url ||= self.registration.scope;
 
   event.waitUntil(
     (async () => {
@@ -62,10 +76,14 @@ self.addEventListener("push", (event) => {
 
       notification.body = await client.markdownToTextFetch(notification.body);
 
-      await self.registration.showNotification(notification.title || "Stoat", {
-        icon: notification.icon,
-        body: notification.body,
-      });
+      return await self.registration.showNotification(
+        notification.title || "Stoat",
+        {
+          icon: notification.icon,
+          body: notification.body,
+          data: notification.url,
+        },
+      );
     })(),
   );
 });
