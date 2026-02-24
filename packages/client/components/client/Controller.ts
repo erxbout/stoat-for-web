@@ -8,7 +8,7 @@ import { CONFIGURATION } from "@revolt/common";
 import { ModalControllerExtended } from "@revolt/modal";
 import type { State as ApplicationState } from "@revolt/state";
 import type { Session } from "@revolt/state/stores/Auth";
-import { killServiceWorkerSubscription } from "./NotificationsWorker";
+import { killServiceWorkerSubscription } from "./PushNotifications";
 
 export enum State {
   Ready = "Ready",

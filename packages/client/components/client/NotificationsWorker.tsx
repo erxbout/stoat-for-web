@@ -1,11 +1,10 @@
-import { createEffect, onCleanup, onMount } from "solid-js";
+import { batch, createEffect, onCleanup, onMount } from "solid-js";
 
 import { useLingui } from "@lingui-solid/solid/macro";
 import {
   ChannelEditSystemMessage,
   ChannelOwnershipChangeSystemMessage,
   ChannelRenamedSystemMessage,
-  Client,
   Message,
   MessagePinnedSystemMessage,
   TextSystemMessage,
@@ -193,7 +192,11 @@ export function NotificationsWorker() {
     // todo: play sound
 
     // Don't continue if we don't have notification permissions
-    if (Notification.permission !== "granted") return;
+    if (
+      Notification.permission !== "granted" ||
+      state.notifications.getEnabled() !== "allowed"
+    )
+      return;
 
     console.info(`[notification] ${title} ${icon} ${body}`);
 
@@ -225,63 +228,23 @@ export function NotificationsWorker() {
   function tryRequest() {
     document.removeEventListener("click", tryRequest);
 
-    if (!localStorage.getItem("denied-notifications")) {
+    if (state.notifications.getEnabled() === "default") {
       Notification.requestPermission().then((permission) => {
         if (permission === "denied") {
-          localStorage.setItem("denied-notifications", "1");
-          killServiceWorkerSubscription(client());
+          batch(() => {
+            state.notifications.setEnabled("denied");
+            state.notifications.setPushEnabled("denied");
+          });
         } else {
-          setUpServiceWorkerSubscription();
+          state.notifications.setEnabled("allowed");
         }
       });
     }
   }
 
-  function setUpServiceWorkerSubscription() {
-    navigator.serviceWorker.getRegistration().then((registration) => {
-      if (!registration) return;
-      registration.pushManager
-        .getSubscription()
-        .then(async (subscription) => {
-          if (subscription) return subscription;
-
-          const config = await client().api.get("/");
-
-          return registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: config.vapid,
-          });
-        })
-        .then((subscription) => {
-          client().api.post("/push/subscribe", {
-            endpoint: subscription.endpoint,
-            p256dh: arrayBufferToBase64URL(
-              subscription.getKey("p256dh") || new ArrayBuffer(),
-            ),
-            auth: arrayBufferToBase64URL(
-              subscription.getKey("auth") || new ArrayBuffer(),
-            ),
-          });
-        });
-    });
-  }
-
-  function arrayBufferToBase64URL(buffer: ArrayBuffer): string {
-    const intArray = new Uint8Array(buffer);
-    // Todo: Upon upgrading the target of this repo, use Uint8Array.prototype.toBase64() instead of this.
-    const binaryString = [...intArray.values()]
-      .map((byte) => String.fromCodePoint(byte))
-      .join("");
-    const base64String = btoa(binaryString);
-    return base64String
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
-  }
-
   onMount(() => {
-    // don't bother mounting if denied before
-    if (!localStorage.getItem("denied-notifications")) {
+    // only add click listener if notifications are default
+    if (state.notifications.getEnabled() === "default") {
       document.addEventListener("click", tryRequest);
     }
   });
@@ -289,17 +252,4 @@ export function NotificationsWorker() {
   onCleanup(() => document.removeEventListener("click", tryRequest));
 
   return null;
-}
-
-export function killServiceWorkerSubscription(client: Client) {
-  navigator.serviceWorker.getRegistration().then((registration) => {
-    if (!registration) return;
-    registration.pushManager.getSubscription().then((subscription) =>
-      subscription?.unsubscribe().then((successful) => {
-        if (successful) {
-          client.api.post("/push/unsubscribe");
-        }
-      }),
-    );
-  });
 }
