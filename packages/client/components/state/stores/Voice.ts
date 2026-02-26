@@ -8,6 +8,7 @@ export interface TypeVoice {
 
   echoCancellation: boolean;
   noiseSupression: boolean;
+  playJoinLeaveSounds: boolean;
 
   inputVolume: number;
   outputVolume: number;
@@ -42,6 +43,7 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
     return {
       echoCancellation: true,
       noiseSupression: true,
+      playJoinLeaveSounds: true,
       inputVolume: 1.0,
       outputVolume: 1.0,
       userVolumes: {},
@@ -69,6 +71,10 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
 
     if (typeof input.noiseSupression === "boolean") {
       data.noiseSupression = input.noiseSupression;
+    }
+
+    if (typeof input.playJoinLeaveSounds === "boolean") {
+      data.playJoinLeaveSounds = input.playJoinLeaveSounds;
     }
 
     if (typeof input.inputVolume === "number") {
@@ -217,5 +223,19 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
    */
   get outputVolume(): number {
     return this.get().outputVolume;
+  }
+
+  /**
+   * Set play join leave sounds
+   */
+  set playJoinLeaveSounds(value: boolean) {
+    this.set("playJoinLeaveSounds", value);
+  }
+
+  /**
+   * Get play join leave sounds
+   */
+  get playJoinLeaveSounds(): boolean {
+    return this.get().playJoinLeaveSounds ?? true;
   }
 }
