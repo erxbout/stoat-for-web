@@ -149,7 +149,7 @@ function UserTile() {
   }
 
   createEffect(() => {
-    if (isVideoMuted()) {
+    if (isVideoMuted() && document.fullscreenElement) {
       document.exitFullscreen();
     }
   });
