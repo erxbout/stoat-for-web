@@ -75,18 +75,16 @@ export default {
   MAX_FILE_SIZE:
     (import.meta.env.VITE_CFG_MAX_FILE_SIZE as number) ?? 20_000_000,
   /**
-<<<<<<< HEAD
    * RNNoise worklet CDN host location. Defaults to blank, which uses the url provided by the livekit-rnnoise-processor package.
    */
   RNNOISE_WORKLET_CDN_URL:
     (import.meta.env.VITE_RNNOISE_WORKLET_CDN_URL as string) ?? "",
-=======
+  /**
    * Enable video allows the web client to enable video and screensharing
    */
   ENABLE_VIDEO:
     ((import.meta.env.VITE_CFG_ENABLE_VIDEO as string) ?? "").toLowerCase() ==
     "true",
->>>>>>> 42d46f35b87fd9b5f45b80a55e10eb2f3d48c80b
   /**
    * Session ID to set during development.
    */
