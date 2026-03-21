@@ -37,10 +37,8 @@ export default function FlowCreate() {
       captcha,
     });
 
-    if (getClient().configuration?.features.email) {
-      setFlowCheckEmail(email);
-      navigate("/login/check", { replace: true });
-    } else {
+    const client = getClient();
+    if (client.configuration && !client.configuration.features.email) {
       await login(
         {
           email,
@@ -49,6 +47,9 @@ export default function FlowCreate() {
         modals,
       );
       navigate("/login/auth", { replace: true });
+    } else {
+      setFlowCheckEmail(email);
+      navigate("/login/check", { replace: true });
     }
   }
 
