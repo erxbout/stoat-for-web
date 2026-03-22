@@ -22,6 +22,7 @@ import MdScience from "@material-design-icons/svg/outlined/science.svg?component
 import MdSmartToy from "@material-design-icons/svg/outlined/smart_toy.svg?component-solid";
 import MdVerifiedUser from "@material-design-icons/svg/outlined/verified_user.svg?component-solid";
 import MdWorkspacePremium from "@material-design-icons/svg/outlined/workspace_premium.svg?component-solid";
+import MdSpeaker from "@material-design-icons/svg/outlined/speaker.svg?component-solid";
 
 import pkg from "../../../../../../package.json";
 
@@ -38,6 +39,7 @@ import { MyBots, ViewBot } from "./user/bots";
 import { EditProfile } from "./user/profile";
 import { EditSubscription } from "./user/subscriptions";
 import { VoiceSettings } from "./user/voice/VoiceSettings";
+import { SoundsSettings } from "./user/sounds/SoundsSettings";
 
 const Config: SettingsConfiguration<{ server: Server }> = {
   /**
@@ -93,6 +95,8 @@ const Config: SettingsConfiguration<{ server: Server }> = {
         return <Native />;
       case "voice":
         return <VoiceSettings />;
+      case "sounds":            
+        return <SoundsSettings />;
       default:
         return null;
     }
@@ -211,6 +215,11 @@ const Config: SettingsConfiguration<{ server: Server }> = {
               id: "appearance",
               icon: <MdPalette {...iconSize(20)} />,
               title: <Trans>Appearance</Trans>,
+            },
+            {                                             
+              id: "sounds",                              
+              icon: <MdSpeaker {...iconSize(20)} />,     
+              title: <Trans>Sounds</Trans>,             
             },
             // {
             //   id: "accessibility",

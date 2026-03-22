@@ -96,6 +96,8 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
 
     if (typeof input.autoGainControl === "boolean") {
       data.autoGainControl = input.autoGainControl;
+    }
+    
     if (typeof input.playJoinLeaveSounds === "boolean") {
       data.playJoinLeaveSounds = input.playJoinLeaveSounds;
     }
