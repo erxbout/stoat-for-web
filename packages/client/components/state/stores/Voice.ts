@@ -21,6 +21,11 @@ export interface TypeVoice {
   noiseSupression: NoiseSuppresionState;
   autoGainControl: boolean;
 
+  playJoinSound: boolean;
+  playLeaveSound: boolean;
+  customJoinSound: string | null;
+  customLeaveSound: string | null;
+
   inputVolume: number;
   outputVolume: number;
 
@@ -55,6 +60,10 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       echoCancellation: true,
       noiseSupression: "browser",
       autoGainControl: true,
+      playJoinSound: true,
+      playLeaveSound: true,
+      customJoinSound: null,
+      customLeaveSound: null,
       inputVolume: 1.0,
       outputVolume: 1.0,
       userVolumes: {},
@@ -94,6 +103,26 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
 
     if (typeof input.autoGainControl === "boolean") {
       data.autoGainControl = input.autoGainControl;
+    }
+
+    if (typeof input.playJoinSound === "boolean") {
+      data.playJoinSound = input.playJoinSound;
+    }
+    if (typeof input.playLeaveSound === "boolean") {
+      data.playLeaveSound = input.playLeaveSound;
+    }
+
+    if (
+      typeof input.customJoinSound === "string" ||
+      input.customJoinSound === null
+    ) {
+      data.customJoinSound = input.customJoinSound;
+    }
+    if (
+      typeof input.customLeaveSound === "string" ||
+      input.customLeaveSound === null
+    ) {
+      data.customLeaveSound = input.customLeaveSound;
     }
 
     if (typeof input.inputVolume === "number") {
@@ -256,5 +285,54 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
    */
   get outputVolume(): number {
     return this.get().outputVolume;
+  }
+
+  /**
+   * Set play join sounds
+   */
+  set playJoinSound(value: boolean) {
+    this.set("playJoinSound", value);
+  }
+  /**
+   * Get play join sounds
+   */
+  get playJoinSound(): boolean {
+    return this.get().playJoinSound ?? true;
+  }
+  /**
+   * Set play leave sounds
+   */
+  set playLeaveSound(value: boolean) {
+    this.set("playLeaveSound", value);
+  }
+  /**
+   * Get play leave sounds
+   */
+  get playLeaveSound(): boolean {
+    return this.get().playLeaveSound ?? true;
+  }
+  /**
+   * Set custom join sound
+   */
+  set customJoinSound(value: string | null) {
+    this.set("customJoinSound", value);
+  }
+  /**
+   * Get custom join sound
+   */
+  get customJoinSound(): string | null {
+    return this.get().customJoinSound ?? null;
+  }
+  /**
+   * Set custom leave sound
+   */
+  set customLeaveSound(value: string | null) {
+    this.set("customLeaveSound", value);
+  }
+  /**
+   * Get custom leave sound
+   */
+  get customLeaveSound(): string | null {
+    return this.get().customLeaveSound ?? null;
   }
 }

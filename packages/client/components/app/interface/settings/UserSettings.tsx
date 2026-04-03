@@ -20,6 +20,7 @@ import MdPalette from "@material-design-icons/svg/outlined/palette.svg?component
 import MdRateReview from "@material-design-icons/svg/outlined/rate_review.svg?component-solid";
 import MdScience from "@material-design-icons/svg/outlined/science.svg?component-solid";
 import MdSmartToy from "@material-design-icons/svg/outlined/smart_toy.svg?component-solid";
+import MdSpeaker from "@material-design-icons/svg/outlined/speaker.svg?component-solid";
 import MdVerifiedUser from "@material-design-icons/svg/outlined/verified_user.svg?component-solid";
 import MdWorkspacePremium from "@material-design-icons/svg/outlined/workspace_premium.svg?component-solid";
 
@@ -36,6 +37,7 @@ import { AccountCard } from "./user/_AccountCard";
 import { AppearanceMenu } from "./user/appearance";
 import { MyBots, ViewBot } from "./user/bots";
 import { EditProfile } from "./user/profile";
+import { SoundsSettings } from "./user/sounds/SoundsSettings";
 import { EditSubscription } from "./user/subscriptions";
 import { VoiceSettings } from "./user/voice/VoiceSettings";
 
@@ -93,6 +95,8 @@ const Config: SettingsConfiguration<{ server: Server }> = {
         return <Native />;
       case "voice":
         return <VoiceSettings />;
+      case "sounds":
+        return <SoundsSettings />;
       default:
         return null;
     }
@@ -211,6 +215,11 @@ const Config: SettingsConfiguration<{ server: Server }> = {
               id: "appearance",
               icon: <MdPalette {...iconSize(20)} />,
               title: <Trans>Appearance</Trans>,
+            },
+            {
+              id: "sounds",
+              icon: <MdSpeaker {...iconSize(20)} />,
+              title: <Trans>Sounds</Trans>,
             },
             // {
             //   id: "accessibility",

@@ -22,6 +22,11 @@ import { createStore, SetStoreFunction } from "solid-js/store";
 import { InRoom } from "./components/InRoom";
 import { RoomAudioManager } from "./components/RoomAudioManager";
 
+import JoinSoundURL from "../../src/audio/stoatJoinVoiceSound.ogg";
+import LeaveSoundURL from "../../src/audio/stoatLeaveVoiceSound.ogg";
+
+import { playSound } from "../common/lib/sound";
+
 type State =
   | "READY"
   | "DISCONNECTED"
@@ -143,7 +148,27 @@ class Voice {
         });
     });
 
+    room.addListener("connected", () => {
+      this.#setState("CONNECTED");
+
+      if (this.#settings.playJoinSound) {
+        playSound(this.#settings.customJoinSound || JoinSoundURL);
+      }
+    });
+
     room.addListener("disconnected", () => this.#setState("DISCONNECTED"));
+
+    room.addListener("participantConnected", () => {
+      if (this.#settings.playJoinSound) {
+        playSound(this.#settings.customJoinSound || JoinSoundURL);
+      }
+    });
+
+    room.addListener("participantDisconnected", () => {
+      if (this.#settings.playLeaveSound) {
+        playSound(this.#settings.customLeaveSound || LeaveSoundURL);
+      }
+    });
 
     if (!auth) {
       auth = await channel.joinCall("worldwide");
